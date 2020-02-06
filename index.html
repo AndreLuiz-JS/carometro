@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Carômetro - Pensi</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <!--<script src="js/tracking.js"></script>
+    <script src="js/data/face-min.js"></script>-->
+</head>
+<body>
+<header>
+    <img width="100" src="logo/pensi.png" id="logo"/>
+</header>
+    <form >
+        <p><input id="arq" type="file" accept="image/*" multiple>
+        <input id="btn" type="button" value="Gerar Carômetro"></p>
+        <p>Colunas:
+        <input type="number" id="col" inputmode="numeric" max="8" min="1" value="6">
+        Título:
+        <input id="titulo" type="text"></p>
+    </form>
+    <div id="preview"></div>
+<script>
+    //const tracker = new tracking.ObjectTracker('face');
+    var btn = document.getElementById("btn");
+    var input = document.getElementById("arq");
+    var titulo = document.getElementById("titulo");
+    var preview = document.getElementById("preview");
+    var logo = document.getElementById('logo');
+    var colunas = document.getElementById("col");
+    var pag = {w:"21cm",h:"28.5cm"}
+
+    var fileTypes = [
+        'image/jpeg',
+        'image/pjpeg',
+        'image/png'
+    ]
+    
+    function validFileType(file) {
+    for(var i = 0; i < fileTypes.length; i++) {
+        if(file.type === fileTypes[i]) {
+        return true;
+        }
+    }
+
+    return false;
+    }
+
+    function returnFileSize(number) {
+    if(number < 1024) {
+        return number + 'bytes';
+    } else if(number >= 1024 && number < 1048576) {
+        return (number/1024).toFixed(1) + 'KB';
+    } else if(number >= 1048576) {
+        return (number/1048576).toFixed(1) + 'MB';
+    }
+    }
+
+    function updateImageDisplay() {
+        while(preview.firstChild) {
+        preview.removeChild(preview.firstChild);
+        }
+    
+        var curFiles = input.files;
+        if(curFiles.length === 0) {
+        var para = document.createElement('span');
+        para.textContent = 'Nenhum arquivo de imagem selecionado';
+        preview.appendChild(para);
+        } else {
+        var list = document.createElement('form','ul');
+        preview.appendChild(list);
+        for(var i = 0; i < curFiles.length; i++) {
+            var listItem = document.createElement('li');
+            var para = document.createElement('span');
+            var nome = curFiles[i].name.split('.')[0];
+            if(validFileType(curFiles[i])) {
+            para.textContent = nome + ', tamanho ' + returnFileSize(curFiles[i].size) + '.';
+            var image = document.createElement('img');
+            image.src = window.URL.createObjectURL(curFiles[i]);
+    
+            listItem.appendChild(image);
+            listItem.appendChild(para);
+    
+            } else {
+            para.textContent = 'Arquivo ' + curFiles[i].name + ': Não é um arquivo de imagem válido.';
+            listItem.appendChild(para);
+            }
+    
+            list.appendChild(listItem);
+        }
+    }
+}
+
+    function geraCarometro(){
+        
+        while(preview.firstChild) {
+            preview.removeChild(preview.firstChild);
+        }
+        
+        var curFiles = input.files;
+        if(curFiles.length === 0) {
+            var para = document.createElement('span');
+            para.textContent = 'Nenhum arquivo de imagem selecionado';
+            preview.appendChild(para);
+        } else {
+            document.body.innerHTML = '';
+            var tit = document.createElement('h1');
+            var content = document.createElement('section');
+            tit.id='titulo'
+            tit.appendChild(logo);
+            tit.innerHTML += titulo.value;
+            content.id = 'sec';
+            content.style.width = pag.w;
+            content.style.height = pag.h;
+            content.style.pageBreakAfter = 'always';
+            document.body.appendChild(content);
+            content.appendChild(tit);
+            for(var i = 0; i < curFiles.length; i++) {
+                var listItem = document.createElement('div');
+                if(i % Number(colunas.value)==0){
+                    var list = document.createElement('div')
+                    list.className="container";
+                    list.id=`div${Number.parseInt(i/Number(colunas.value))}`
+                    content.appendChild(list);
+                } 
+
+                if(validFileType(curFiles[i])) {
+
+                    var para = document.createElement('p');
+                    var nome = curFiles[i].name.split('.')[0];
+                    var img = document.createElement('img');
+                    var imgSizeW = Number(content.style.width.split('cm')[0])/Number(colunas.value)-0.5;
+                    para.textContent = nome;
+                    listItem.style.width = imgSizeW+"cm";
+                    listItem.className = "box";
+                    img.style.width = imgSizeW+"cm";
+                    list.style.paddingLeft = ((Number(pag.w.split('cm')[0]) - ((imgSizeW+0.25) * Number(colunas.value))) / 2) + "cm"
+                    img.id = "image"
+                    img.src = window.URL.createObjectURL(curFiles[i]);
+                    list.appendChild(listItem);
+                    listItem.appendChild(img);
+                    listItem.appendChild(para);
+                } else {
+                    para.textContent = 'Arquivo ' + curFiles[i].name + ': Não é um arquivo de imagem válido.';
+                    listItem.appendChild(para);
+                }
+            
+                list.appendChild(listItem);
+            }
+            var promessa = new Promise(function(resolve, reject){
+                if (!resolve(setTimeout(ajustarPag,1000)))
+                    throw reject;
+            });
+            document.addEventListener = ('load',promessa.then);
+            //faceCrop();
+        }
+    }
+
+function ajustarPag(){
+    var img = document.getElementsByTagName('img') ;
+    var p = document.getElementsByTagName('p');
+    var div = document.getElementsByClassName('container');
+    var section = document.getElementById('sec');
+    var titulo = document.getElementById('titulo')
+    var sec = {w:Number(section.offsetWidth),h:Number(section.offsetHeight)};
+    var divH = {img:0,p:0,t:0};
+    var margem = 0;
+    var alturaPagina = titulo.offsetHeight;
+    for(var i =0; i < img.length; i++){
+            if (divH.img < img[i].height) {
+                divH.img = Number(img[i].height);
+                divH.p = Number(p[i].offsetHeight);
+            }
+            
+    }
+    margem = (sec.w-(img[0].offsetWidth+11)*Number(colunas.value))/2;
+    divH.t = divH.img + divH.p +10;
+    for (var i=0; i < div.length;i++){
+        div[i].style.height = divH.t+'px';
+    }
+    for (var i=0; i < div.length;i++){
+        if(alturaPagina + Number(div[i].offsetHeight)  > section.offsetHeight){
+            var newSec = document.createElement('section');
+            var newTitulo = document.createElement('h1');
+            newTitulo.innerHTML = titulo.innerHTML;
+            newSec.style.width=pag.w;
+            newSec.style.height=pag.h;
+            newSec.style.pageBreakAfter='always';
+            document.body.appendChild(newSec);
+            newSec.appendChild(newTitulo);
+            alturaPagina = titulo.offsetHeight;
+            for(var i2=i;i2<div.length;i2++){
+                var newDiv = document.getElementById("div"+i2)
+                newSec.append(newDiv);
+            }
+        }
+        alturaPagina += Number(div[i].offsetHeight);
+    }
+}
+
+    //função para recorte do rosto (não funcional nesta versão)
+    /* function faceCrop(){
+        var tracker = new tracking.ObjectTracker('face');
+                    tracking.track('#image', tracker);
+                    tracker.on('track', event => {
+                        event.data.forEach(imagem => {
+                            var width = imagem.width;
+                            var height = imagem.height;
+                            var x = imagem.x;
+                            var y = imagem.y;
+                            console.log(width)
+                            console.log(height) 
+                            console.log(x);
+                            console.log(y);
+                        });
+                        console.log(event)
+                    });
+    }*/
+    input.addEventListener('change', updateImageDisplay);
+    btn.addEventListener('click', geraCarometro);
+</script>  
+</body>
+</html>
