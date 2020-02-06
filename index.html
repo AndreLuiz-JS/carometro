@@ -167,7 +167,7 @@ function ajustarPag(){
     var sec = {w:Number(section.offsetWidth),h:Number(section.offsetHeight)};
     var divH = {img:0,p:0,t:0};
     var margem = 0;
-    var alturaPagina = titulo.offsetHeight;
+    var alturaPagina = titulo.offsetHeight+20;
     for(var i =0; i < img.length; i++){
             if (divH.img < img[i].height) {
                 divH.img = Number(img[i].height);
@@ -190,7 +190,7 @@ function ajustarPag(){
             newSec.style.pageBreakAfter='always';
             document.body.appendChild(newSec);
             newSec.appendChild(newTitulo);
-            alturaPagina = titulo.offsetHeight;
+            alturaPagina = titulo.offsetHeight+20;
             for(var i2=i;i2<div.length;i2++){
                 var newDiv = document.getElementById("div"+i2)
                 newSec.append(newDiv);
