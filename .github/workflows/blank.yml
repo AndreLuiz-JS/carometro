@@ -1,0 +1,16 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Make a Code Quality
+      run: echo Code Quality
+    - name: Implement Face Crop
+      run: echo Face Crop
+        
