@@ -93,9 +93,18 @@ html {
   .box > img {
     border-radius: 14px 14px 0px 0px;
   }
-  #logo{
-    padding: 0 ;
-  }
   #titulo{
-    justify-content: space-between;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 15% 85%;
+    margin: 1cm;
+  }
+  #logo{
+    padding: 0;
+  }
+  #texto{
+    box-sizing: border-box;
+    text-align: center;
+    font-size: 40px;
+    font-weight: bold;
   }

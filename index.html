@@ -11,7 +11,7 @@
 </head>
 <body>
 <header>
-    <img width="100" src="logo/pensi.png" id="logo"/>
+    <img width="100" src="pensi.png" id="logo"/>
 </header>
     <form >
         <p><input id="arq" type="file" accept="image/*" multiple>
@@ -106,11 +106,11 @@
             preview.appendChild(para);
         } else {
             document.body.innerHTML = '';
-            var tit = document.createElement('h1');
+            var tit = document.createElement('div');
             var content = document.createElement('section');
             tit.id='titulo'
             tit.appendChild(logo);
-            tit.innerHTML += titulo.value;
+            tit.innerHTML += `<div id="texto">${titulo.value}</div>`;
             content.id = 'sec';
             content.style.width = pag.w;
             content.style.height = pag.h;
@@ -167,7 +167,7 @@ function ajustarPag(){
     var sec = {w:Number(section.offsetWidth),h:Number(section.offsetHeight)};
     var divH = {img:0,p:0,t:0};
     var margem = 0;
-    var alturaPagina = titulo.offsetHeight;
+    var alturaPagina = titulo.offsetHeight+20;
     for(var i =0; i < img.length; i++){
             if (divH.img < img[i].height) {
                 divH.img = Number(img[i].height);
@@ -183,41 +183,22 @@ function ajustarPag(){
     for (var i=0; i < div.length;i++){
         if(alturaPagina + Number(div[i].offsetHeight)  > section.offsetHeight){
             var newSec = document.createElement('section');
-            var newTitulo = document.createElement('h1');
+            var newTitulo = document.createElement('div');
             newTitulo.innerHTML = titulo.innerHTML;
             newSec.style.width=pag.w;
             newSec.style.height=pag.h;
             newSec.style.pageBreakAfter='always';
             document.body.appendChild(newSec);
             newSec.appendChild(newTitulo);
-            alturaPagina = titulo.offsetHeight;
+            alturaPagina = titulo.offsetHeight+20;
             for(var i2=i;i2<div.length;i2++){
                 var newDiv = document.getElementById("div"+i2)
                 newSec.append(newDiv);
             }
         }
-        alturaPagina += Number(div[i].offsetHeight);
+        alturaPagina += Number(div[i].offsetHeight+10);
     }
 }
-
-    //função para recorte do rosto (não funcional nesta versão)
-    /* function faceCrop(){
-        var tracker = new tracking.ObjectTracker('face');
-                    tracking.track('#image', tracker);
-                    tracker.on('track', event => {
-                        event.data.forEach(imagem => {
-                            var width = imagem.width;
-                            var height = imagem.height;
-                            var x = imagem.x;
-                            var y = imagem.y;
-                            console.log(width)
-                            console.log(height) 
-                            console.log(x);
-                            console.log(y);
-                        });
-                        console.log(event)
-                    });
-    }*/
     input.addEventListener('change', updateImageDisplay);
     btn.addEventListener('click', geraCarometro);
 </script>  
