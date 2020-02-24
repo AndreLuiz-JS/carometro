@@ -4,35 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery.facedetection.min.js"></script>
     <title>Carômetro - Pensi</title>
-    <link href="style.css" rel="stylesheet" type="text/css" />
-    <!--<script src="js/tracking.js"></script>
-    <script src="js/data/face-min.js"></script>-->
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <header>
-    <img width="100" src="pensi.png" id="logo"/>
+    <div id="logo" class="hidden"><img width="100" src="logo/pensi.png" id="logo"/></div>
 </header>
     <form >
-        <p><input id="arq" type="file" accept="image/*" multiple>
-        <input id="btn" type="button" value="Gerar Carômetro"></p>
-        <p>Colunas:
-        <input type="number" id="col" inputmode="numeric" max="8" min="1" value="6">
-        Título:
-        <input id="titulo" type="text"></p>
+        <div id="formulario">
+            <div>
+                <input id="arq" type="file" accept="image/*" multiple>
+            </div>
+            <div></div><div></div>
+            <div>
+                <p>
+                    Colunas:
+                    <input type="number" id="col" inputmode="numeric" max="8" min="1" value="6">
+                </p>
+                <p>
+                    Título:
+                    <input id="titulo" type="text">
+                </p>
+            </div>
+            <div>Reconhecimento Facial
+                <input type="radio" id="no" name="faceRec" value="false" checked>
+                <label for="no">Não</label>
+                <input type="radio" id="yes" name="faceRec" value="true">
+                <label for="yes">Sim</label>
+            </div>
+            <div>
+                <input id="btn" type="button" value="Gerar Carômetro">
+            </div>
+        </div>
     </form>
     <div id="preview"></div>
+<script src="js/imageCrop.js"></script>
 <script>
-    //const tracker = new tracking.ObjectTracker('face');
-    var btn = document.getElementById("btn");
-    var input = document.getElementById("arq");
-    var titulo = document.getElementById("titulo");
-    var preview = document.getElementById("preview");
-    var logo = document.getElementById('logo');
-    var colunas = document.getElementById("col");
-    var pag = {w:"21cm",h:"28.5cm"}
+    const btn = document.getElementById("btn");
+    const input = document.getElementById("arq");
+    const titulo = document.getElementById("titulo");
+    const preview = document.getElementById("preview");
+    const logo = document.getElementById('logo');
+    const colunas = document.getElementById("col");
+    const radio = document.getElementById('yes');
+    const pag = {w:"21cm",h:"28.5cm"}
 
-    var fileTypes = [
+    const fileTypes = [
         'image/jpeg',
         'image/pjpeg',
         'image/png'
@@ -47,17 +67,6 @@
 
     return false;
     }
-
-    function returnFileSize(number) {
-    if(number < 1024) {
-        return number + 'bytes';
-    } else if(number >= 1024 && number < 1048576) {
-        return (number/1024).toFixed(1) + 'KB';
-    } else if(number >= 1048576) {
-        return (number/1048576).toFixed(1) + 'MB';
-    }
-    }
-
     function updateImageDisplay() {
         while(preview.firstChild) {
         preview.removeChild(preview.firstChild);
@@ -76,13 +85,11 @@
             var para = document.createElement('span');
             var nome = curFiles[i].name.split('.')[0];
             if(validFileType(curFiles[i])) {
-            para.textContent = nome + ', tamanho ' + returnFileSize(curFiles[i].size) + '.';
-            var image = document.createElement('img');
-            image.src = window.URL.createObjectURL(curFiles[i]);
-    
-            listItem.appendChild(image);
-            listItem.appendChild(para);
-    
+                var image = document.createElement('img');
+                para.textContent = nome;
+                image.src = window.URL.createObjectURL(curFiles[i]);
+                listItem.appendChild(image);
+                listItem.appendChild(para);
             } else {
             para.textContent = 'Arquivo ' + curFiles[i].name + ': Não é um arquivo de imagem válido.';
             listItem.appendChild(para);
@@ -108,9 +115,11 @@
             document.body.innerHTML = '';
             var tit = document.createElement('div');
             var content = document.createElement('section');
-            tit.id='titulo'
+            tit.id='cabecalho';
+            logo.classList.remove('hidden');
             tit.appendChild(logo);
-            tit.innerHTML += `<div id="texto">${titulo.value}</div>`;
+            if (tit.innerHTML=='') tit.innerHTML+='<div id="texto">CARÔMETRO</div>'
+            else tit.innerHTML += `<div id="texto">${titulo.value}</div>`;
             content.id = 'sec';
             content.style.width = pag.w;
             content.style.height = pag.h;
@@ -135,9 +144,10 @@
                     para.textContent = nome;
                     listItem.style.width = imgSizeW+"cm";
                     listItem.className = "box";
-                    img.style.width = imgSizeW+"cm";
                     list.style.paddingLeft = ((Number(pag.w.split('cm')[0]) - ((imgSizeW+0.25) * Number(colunas.value))) / 2) + "cm"
-                    img.id = "image"
+                    img.style.width = imgSizeW+"cm";
+                    img.className = "imagem";
+                    img.id='img'+i;
                     img.src = window.URL.createObjectURL(curFiles[i]);
                     list.appendChild(listItem);
                     listItem.appendChild(img);
@@ -154,51 +164,63 @@
                     throw reject;
             });
             document.addEventListener = ('load',promessa.then);
-            //faceCrop();
         }
     }
 
-function ajustarPag(){
-    var img = document.getElementsByTagName('img') ;
-    var p = document.getElementsByTagName('p');
-    var div = document.getElementsByClassName('container');
-    var section = document.getElementById('sec');
-    var titulo = document.getElementById('titulo')
-    var sec = {w:Number(section.offsetWidth),h:Number(section.offsetHeight)};
-    var divH = {img:0,p:0,t:0};
-    var margem = 0;
-    var alturaPagina = titulo.offsetHeight+20;
+
+
+async function ajustarPag(){
+    const img = document.getElementsByTagName('img') ;
+    const p = document.getElementsByTagName('p');
+    const div = document.getElementsByClassName('container');
+    const section = document.getElementById('sec');
+    const titulo = document.getElementById('cabecalho');
+    let sec = {w:Number(section.offsetWidth),h:Number(section.offsetHeight)};
+    let divH = {img:0,p:0,t:0};
+    let margem = 0;
+    let alturaPagina = titulo.offsetHeight;
+    
     for(var i =0; i < img.length; i++){
-            if (divH.img < img[i].height) {
-                divH.img = Number(img[i].height);
+            if (divH.img < img[i].clientHeight) {
+                divH.img = Number(img[i].clientHeight);
                 divH.p = Number(p[i].offsetHeight);
             }
             
     }
-    margem = (sec.w-(img[0].offsetWidth+11)*Number(colunas.value))/2;
+    margem = (sec.w-(img[0].clientWidth+11)*Number(colunas.value))/2;
     divH.t = divH.img + divH.p +10;
     for (var i=0; i < div.length;i++){
-        div[i].style.height = divH.t+'px';
-    }
-    for (var i=0; i < div.length;i++){
-        if(alturaPagina + Number(div[i].offsetHeight)  > section.offsetHeight){
+        if(alturaPagina + Number(div[i].offsetHeight + titulo.offsetHeight)  > section.offsetHeight){
             var newSec = document.createElement('section');
             var newTitulo = document.createElement('div');
+            newTitulo.id = 'cabecalho';
             newTitulo.innerHTML = titulo.innerHTML;
             newSec.style.width=pag.w;
             newSec.style.height=pag.h;
             newSec.style.pageBreakAfter='always';
             document.body.appendChild(newSec);
             newSec.appendChild(newTitulo);
-            alturaPagina = titulo.offsetHeight+20;
+            alturaPagina = titulo.offsetHeight;
             for(var i2=i;i2<div.length;i2++){
                 var newDiv = document.getElementById("div"+i2)
                 newSec.append(newDiv);
             }
         }
-        alturaPagina += Number(div[i].offsetHeight+10);
+        alturaPagina += Number(div[i].offsetHeight);
+    }
+
+    if (radio.checked) {
+        const img = document.getElementsByClassName('imagem');
+        const array = [];
+        for (i in img){
+            if (img[i].nodeName == 'IMG') {
+                array.push(img[i]);
+            }
+        }
+        drawImages(await faceDetectArray(array));
     }
 }
+
     input.addEventListener('change', updateImageDisplay);
     btn.addEventListener('click', geraCarometro);
 </script>  
