@@ -159,17 +159,13 @@
             
                 list.appendChild(listItem);
             }
-            var promessa = new Promise(function(resolve, reject){
-                if (!resolve(setTimeout(ajustarPag,1000)))
-                    throw reject;
-            });
-            document.addEventListener = ('load',promessa.then);
+            setTimeout(ajustarPag,5000);
         }
     }
 
 
 
-async function ajustarPag(){
+function ajustarPag(){
     const img = document.getElementsByTagName('img') ;
     const p = document.getElementsByTagName('p');
     const div = document.getElementsByClassName('container');
@@ -212,12 +208,18 @@ async function ajustarPag(){
     if (radio.checked) {
         const img = document.getElementsByClassName('imagem');
         const array = [];
+        var count = 0;
         for (i in img){
             if (img[i].nodeName == 'IMG') {
                 array.push(img[i]);
+                count++;
             }
         }
-        drawImages(await faceDetectArray(array));
+        
+        setTimeout(async function(){
+            let images = await faceDetectArray(array);
+            drawImages(images);
+        }, count*100);
     }
 }
 

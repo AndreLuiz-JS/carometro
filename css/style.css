@@ -98,8 +98,9 @@ section {
   margin: 2px 2px;
   padding: 0;
 }
-.box > img {
+.box > img, .box p {
   border-radius: 14px 14px 0px 0px;
+  font-size: 6pt;
 }
 #cabecalho{
   display: grid;

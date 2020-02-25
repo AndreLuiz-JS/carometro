@@ -115,7 +115,6 @@ async function drawImages(arrayImageFaceDetected){
             );
             ctx.drawImage(bitmap,0,0);
             file.src = ctx.canvas.toDataURL('image/jpeg',1)
-            console.log(file)
         }
     }
 }
