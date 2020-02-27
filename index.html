@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,16 +10,18 @@
     <title>Carômetro - Pensi</title>
     <link href="css/style.css" rel="stylesheet" type="text/css" />
 </head>
+
 <body>
-<header>
-    <div id="logo" class="hidden"><img width="100" src="logo/pensi.png" id="logo"/></div>
-</header>
-    <form >
+    <header>
+        <div id="logo" class="hidden"><img width="100" src="logo/pensi.png" id="logo" /></div>
+    </header>
+    <form>
         <div id="formulario">
             <div>
                 <input id="arq" type="file" accept="image/*" multiple>
             </div>
-            <div></div><div></div>
+            <div></div>
+            <div></div>
             <div>
                 <p>
                     Colunas:
@@ -41,190 +44,183 @@
         </div>
     </form>
     <div id="preview"></div>
-<script src="js/imageCrop.js"></script>
-<script>
-    const btn = document.getElementById("btn");
-    const input = document.getElementById("arq");
-    const titulo = document.getElementById("titulo");
-    const preview = document.getElementById("preview");
-    const logo = document.getElementById('logo');
-    const colunas = document.getElementById("col");
-    const radio = document.getElementById('yes');
-    const pag = {w:"21cm",h:"28.5cm"}
-
-    const fileTypes = [
-        'image/jpeg',
-        'image/pjpeg',
-        'image/png'
-    ]
-    
-    function validFileType(file) {
-    for(var i = 0; i < fileTypes.length; i++) {
-        if(file.type === fileTypes[i]) {
-        return true;
+    <script src="js/imageCrop.js"></script>
+    <script>
+        const btn = document.getElementById("btn");
+        const input = document.getElementById("arq");
+        const titulo = document.getElementById("titulo");
+        const preview = document.getElementById("preview");
+        const logo = document.getElementById('logo');
+        const col = Number(document.getElementById("col").value);
+        const radio = document.getElementById('yes');
+        const arrayImages = [];
+        //configurações de tamanho em cm
+        const pag = {
+            w: 21,
+            h: 28.5
         }
-    }
+        const pageMargin = 0.8;
+        const imgMargin = 0.1;
+        const txtHeight = 1.3;
+        const imgBorder = 0.08;
 
-    return false;
-    }
-    function updateImageDisplay() {
-        while(preview.firstChild) {
-        preview.removeChild(preview.firstChild);
+        function checkData() {
+            getImageArray(input.files, arrayImages);
+            updateImageDisplay(arrayImages)
+
         }
-    
-        var curFiles = input.files;
-        if(curFiles.length === 0) {
-        var para = document.createElement('span');
-        para.textContent = 'Nenhum arquivo de imagem selecionado';
-        preview.appendChild(para);
-        } else {
-        var list = document.createElement('form','ul');
-        preview.appendChild(list);
-        for(var i = 0; i < curFiles.length; i++) {
-            var listItem = document.createElement('li');
-            var para = document.createElement('span');
-            var nome = curFiles[i].name.split('.')[0];
-            if(validFileType(curFiles[i])) {
-                var image = document.createElement('img');
-                para.textContent = nome;
-                image.src = window.URL.createObjectURL(curFiles[i]);
-                listItem.appendChild(image);
-                listItem.appendChild(para);
-            } else {
-            para.textContent = 'Arquivo ' + curFiles[i].name + ': Não é um arquivo de imagem válido.';
-            listItem.appendChild(para);
+
+        function updateImageDisplay(array) {
+            while (preview.firstChild) {
+                preview.removeChild(preview.firstChild);
             }
-    
-            list.appendChild(listItem);
-        }
-    }
-}
-
-    function geraCarometro(){
-        
-        while(preview.firstChild) {
-            preview.removeChild(preview.firstChild);
-        }
-        
-        var curFiles = input.files;
-        if(curFiles.length === 0) {
-            var para = document.createElement('span');
-            para.textContent = 'Nenhum arquivo de imagem selecionado';
-            preview.appendChild(para);
-        } else {
-            document.body.innerHTML = '';
-            var tit = document.createElement('div');
-            var content = document.createElement('section');
-            tit.id='cabecalho';
-            logo.classList.remove('hidden');
-            tit.appendChild(logo);
-            if (tit.innerHTML=='') tit.innerHTML+='<div id="texto">CARÔMETRO</div>'
-            else tit.innerHTML += `<div id="texto">${titulo.value}</div>`;
-            content.id = 'sec';
-            content.style.width = pag.w;
-            content.style.height = pag.h;
-            content.style.pageBreakAfter = 'always';
-            document.body.appendChild(content);
-            content.appendChild(tit);
-            for(var i = 0; i < curFiles.length; i++) {
-                var listItem = document.createElement('div');
-                if(i % Number(colunas.value)==0){
-                    var list = document.createElement('div')
-                    list.className="container";
-                    list.id=`div${Number.parseInt(i/Number(colunas.value))}`
-                    content.appendChild(list);
-                } 
-
-                if(validFileType(curFiles[i])) {
-
-                    var para = document.createElement('p');
-                    var nome = curFiles[i].name.split('.')[0];
-                    var img = document.createElement('img');
-                    var imgSizeW = Number(content.style.width.split('cm')[0])/Number(colunas.value)-0.5;
-                    para.textContent = nome;
-                    listItem.style.width = imgSizeW+"cm";
-                    listItem.className = "box";
-                    list.style.paddingLeft = ((Number(pag.w.split('cm')[0]) - ((imgSizeW+0.25) * Number(colunas.value))) / 2) + "cm"
-                    img.style.width = imgSizeW+"cm";
-                    img.className = "imagem";
-                    img.id='img'+i;
-                    img.src = window.URL.createObjectURL(curFiles[i]);
-                    list.appendChild(listItem);
-                    listItem.appendChild(img);
-                    listItem.appendChild(para);
-                } else {
-                    para.textContent = 'Arquivo ' + curFiles[i].name + ': Não é um arquivo de imagem válido.';
-                    listItem.appendChild(para);
-                }
-            
+            let list = document.createElement('form', 'ul');
+            preview.appendChild(list);
+            if (arrayImages.length == 0) {
+                let listItem = document.createElement('li');
+                let msg = document.createElement('span');
+                msg.textContent = "Nenhum arquivo de imagem selecionado";
+                listItem.appendChild(msg);
                 list.appendChild(listItem);
             }
-            setTimeout(ajustarPag,5000);
-        }
-    }
-
-
-
-function ajustarPag(){
-    const img = document.getElementsByTagName('img') ;
-    const p = document.getElementsByTagName('p');
-    const div = document.getElementsByClassName('container');
-    const section = document.getElementById('sec');
-    const titulo = document.getElementById('cabecalho');
-    let sec = {w:Number(section.offsetWidth),h:Number(section.offsetHeight)};
-    let divH = {img:0,p:0,t:0};
-    let margem = 0;
-    let alturaPagina = titulo.offsetHeight;
-    
-    for(var i =0; i < img.length; i++){
-            if (divH.img < img[i].clientHeight) {
-                divH.img = Number(img[i].clientHeight);
-                divH.p = Number(p[i].offsetHeight);
-            }
-            
-    }
-    margem = (sec.w-(img[0].clientWidth+11)*Number(colunas.value))/2;
-    divH.t = divH.img + divH.p +10;
-    for (var i=0; i < div.length;i++){
-        if(alturaPagina + Number(div[i].offsetHeight + titulo.offsetHeight)  > section.offsetHeight){
-            var newSec = document.createElement('section');
-            var newTitulo = document.createElement('div');
-            newTitulo.id = 'cabecalho';
-            newTitulo.innerHTML = titulo.innerHTML;
-            newSec.style.width=pag.w;
-            newSec.style.height=pag.h;
-            newSec.style.pageBreakAfter='always';
-            document.body.appendChild(newSec);
-            newSec.appendChild(newTitulo);
-            alturaPagina = titulo.offsetHeight;
-            for(var i2=i;i2<div.length;i2++){
-                var newDiv = document.getElementById("div"+i2)
-                newSec.append(newDiv);
+            for (let i = 0; i < arrayImages.length; i++) {
+                let listItem = document.createElement('li');
+                let msg = document.createElement('span');
+                let nome = arrayImages[i].name.split('.')[0];
+                let image = document.createElement('img');
+                msg.textContent = nome;
+                image.src = window.URL.createObjectURL(arrayImages[i]);
+                listItem.appendChild(image);
+                listItem.appendChild(msg);
+                list.appendChild(listItem);
             }
         }
-        alturaPagina += Number(div[i].offsetHeight);
-    }
 
-    if (radio.checked) {
-        const img = document.getElementsByClassName('imagem');
-        const array = [];
-        var count = 0;
-        for (i in img){
-            if (img[i].nodeName == 'IMG') {
-                array.push(img[i]);
-                count++;
+        async function geraCarometro() {
+            if (arrayImages.length > 0) { //processa imagens reduzindo o tamanho para o maxSize definido no escopo global do arquivo js
+                const imgSizeW = ((pag.w - pageMargin * 2) / col) - imgMargin - imgBorder;
+                let content = document.createElement('section');
+                const tit = document.createElement('div');
+                const div = document.createElement("div");
+                const msg = document.createElement("h1");
+                const progress = document.createElement("progress");
+                document.body.innerHTML = "";
+                div.classList = "status"
+                msg.innerText = "Processando imagens..."
+                div.appendChild(msg);
+                div.appendChild(progress);
+                document.body.appendChild(div);
+                await reduceArrayImages(arrayImages, progress);
+                if (radio.checked) { //verifica se o usuário marcou facedetect como sim e realiza a detecção caso positivo
+                    document.body.innerHTML = "";
+                    const div = document.createElement("div");
+                    const msg = document.createElement("h1");
+                    const progress = document.createElement("progress");
+                    div.classList = "status";
+                    msg.innerText = "Detectando faces..."
+                    div.appendChild(msg);
+                    div.appendChild(progress);
+                    document.body.appendChild(div);
+                    await faceDetectArray(arrayImages, progress);
+
+                    //corte nas imagens que foram detectadas faces
+                    document.body.innerHTML = "";
+                    div.classList = "status";
+                    msg.innerText = "Recortando imagens..."
+                    div.appendChild(msg);
+                    div.appendChild(progress);
+                    document.body.appendChild(div);
+                    await drawImages(arrayImages, progress);
+                }
+
+                //início da renderização do carômetro em tela
+                document.body.innerHTML = '';
+                logo.classList.remove('hidden');
+                tit.id = 'cabecalho';
+                tit.appendChild(logo);
+                if (titulo.value == '') {
+                    tit.innerHTML += '<div id="texto"><h1>CARÔMETRO</h1></div>';
+                } else {
+                    tit.innerHTML += `<div id="texto"><h1>${titulo.value}</h1></div>`;
+                }
+                content.id = 'sec';
+                content.style.width = pag.w + "cm";
+                content.style.height = pag.h + "cm";
+                content.style.pageBreakAfter = 'always';
+                document.body.appendChild(content);
+                content.appendChild(tit);
+                let totalHeight = $("#cabecalho").outerHeight(true) * 0.04; //tamanho do cabeçalho em pixels X 0.04 = tamanho em cm
+                let divHeight = 0;
+                let currentCol;
+                for (i in arrayImages) {
+                    const listItem = document.createElement('div');
+                    const texto = document.createElement('p');
+                    const nome = arrayImages[i].fileOriginal.name.split('.')[0];
+                    const img = document.createElement('img');
+                    let txtHeightStyle = txtHeight;
+                    let imgSizeH = imgSizeW / arrayImages[i].width * arrayImages[i].height + imgBorder * 2 + imgMargin * 2;
+                    currentCol = i % col;
+                    if (currentCol == 0) {
+                        if (totalHeight + divHeight > pag.h) {
+                            const newTit = tit.cloneNode(true);
+                            content = content.cloneNode(false);
+                            document.body.appendChild(content);
+                            content.appendChild(newTit);
+                            totalHeight = $("#cabecalho").outerHeight(true) * 0.04;
+                        }
+                        var list = document.createElement('div')
+                        list.className = "container";
+                        list.id = `div${Number.parseInt(i / col)}`
+                        content.appendChild(list);
+                        totalHeight += divHeight;
+                        divHeight = 0;
+                    }
+                    list.style.height = divHeight + "cm";
+                    listItem.className = "box";
+                    listItem.id = `box${i}`;
+                    listItem.style.width = imgSizeW + "cm";
+                    listItem.style.marginRight = imgMargin + "cm";
+                    listItem.style.marginBottom = imgMargin + "cm";
+                    listItem.style.borderWidth = imgBorder + "cm";
+                    img.style.width = imgSizeW + "cm";
+                    img.className = "imagem";
+                    img.id = 'img' + i;
+                    img.src = window.URL.createObjectURL(arrayImages[i].fileCrop);
+                    texto.textContent = nome;
+                    texto.style.width = imgSizeW + "cm";
+                    texto.style.height = Math.max(txtHeight, divHeight - imgSizeH) + "cm";
+                    texto.style.wordWrap = "break-word";
+                    list.appendChild(listItem);
+                    listItem.appendChild(img);
+                    listItem.appendChild(texto);
+                    divHeight = Math.max(imgSizeH + txtHeight, divHeight);
+                    if (currentCol == col - 1 || arrayImages.length - 1 == i) {
+                        for (c = currentCol; c >= 0; c--) {
+                            const currentBoxTextHeight = $(`#box${i-c} p`)[0].style.height.split("cm")[0];
+                            const currentBoxImageHeight = imgSizeW / arrayImages[i - c].width * arrayImages[i - c].height + imgBorder * 2 + imgMargin * 2;
+                            const currentContainerHeight = $(`#div${Number.parseInt(i / col)}`)[0].style.height.split("cm")[0];
+                            txtHeightStyle = Math.max(currentBoxTextHeight, currentContainerHeight - currentBoxImageHeight)
+                            $(`#box${i-c} p`)[0].style.height = txtHeightStyle + "cm";
+                        }
+                    }
+                }
+            } else {
+                while (preview.firstChild) {
+                    preview.removeChild(preview.firstChild);
+                }
+                const list = document.createElement('form', 'ul');
+                const listItem = document.createElement('li');
+                const msg = document.createElement('span');
+                preview.appendChild(list);
+                msg.textContent = "Nenhum arquivo de imagem selecionado";
+                listItem.appendChild(msg);
+                list.appendChild(listItem);
             }
         }
-        
-        setTimeout(async function(){
-            let images = await faceDetectArray(array);
-            drawImages(images);
-        }, count*100);
-    }
-}
 
-    input.addEventListener('change', updateImageDisplay);
-    btn.addEventListener('click', geraCarometro);
-</script>  
+        input.addEventListener('change', checkData);
+        btn.addEventListener('click', geraCarometro);
+    </script>
 </body>
+
 </html>
