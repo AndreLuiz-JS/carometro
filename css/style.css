@@ -1,11 +1,14 @@
 html,
-body {
+body,
+body * {
     font-family: sans-serif;
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-div {
-    box-sizing: border-box;
+body {
+    margin: 5px;
 }
 
 p {
@@ -62,21 +65,25 @@ form span {
 
 form label {
     background-color: rgb(190, 190, 190);
-    padding: 5px 10px;
+    padding: 5px 15px;
     border-radius: 5px;
     border: 1px ridge black;
     font-size: 0.8rem;
     height: auto;
+    text-align: center;
 }
 
 form input[type="button"] {
-    margin-top: 10px;
-    padding: 3px;
+    padding: 5px 15px;
+    text-align: center;
+    width: 100%;
+    margin: 5px auto;
 }
 
 form input[type="text"],
 form input[type="number"] {
     width: 100%;
+    padding: 5px;
 }
 
 form label:hover,

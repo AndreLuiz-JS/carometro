@@ -95,14 +95,13 @@ async function drawImages(array, progress) {
                 height
             );
         } else {
-            const file = array[i].fileCrop;
+            const file = array[i].fileOriginal;
             if (array[i].width > array[i].height) { //landscape
-                var height = array[i].width * proportion;
+                var height = array[i].height * scale;
                 var width = height * proportion;
-                var newScale = maxSize / width;
-                var bitmap = await createImageBitmap(file, (array[i].width - width) / 2, 0, width, height);
+                var bitmap = await createImageBitmap(file, (array[i].width * scale - width) / 2, 0, width, height);
             } else { //portrait
-                var width = array[i].width;
+                var width = array[i].width * scale;
                 var height = width / proportion;
                 var bitmap = await createImageBitmap(file, 0, 0, width, height);
             }
@@ -114,10 +113,6 @@ async function drawImages(array, progress) {
             resolve => ctx.canvas.toBlob(resolve, "image/jpeg", 0.7)
         )
         array[i].fileCrop = await new File([blob], array[i].name, { type: "image/jpeg" });
-        array[i].scale = {
-            original: scale,
-            cropped: newScale
-        };
         array[i].width = bitmap.width;
         array[i].height = bitmap.height;
     }

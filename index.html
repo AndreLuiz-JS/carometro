@@ -16,31 +16,28 @@
         <div id="logo" class="hidden"><img width="100" src="logo/pensi.png" id="logo" /></div>
     </header>
     <form>
-        <div id="formulario">
-            <div>
-                <input id="arq" type="file" accept="image/*" multiple>
-            </div>
-            <div></div>
-            <div></div>
-            <div>
-                <p>
-                    Colunas:
-                    <input type="number" id="col" inputmode="numeric" max="8" min="1" value="6">
-                </p>
-                <p>
-                    Título:
-                    <input id="titulo" type="text">
-                </p>
-            </div>
-            <div>Reconhecimento Facial
-                <input type="radio" id="no" name="faceRec" value="false" checked>
-                <label for="no">Não</label>
-                <input type="radio" id="yes" name="faceRec" value="true">
-                <label for="yes">Sim</label>
-            </div>
-            <div>
-                <input id="btn" type="button" value="Gerar Carômetro">
-            </div>
+        <div>
+            <input id="arq" type="file" accept="image/*" multiple>
+        </div>
+        <div>
+            <p>
+                Colunas:
+                <input type="number" id="col" inputmode="numeric" max="8" min="1" value="6">
+            </p>
+            <p>
+                Título:
+                <input id="titulo" type="text">
+            </p>
+        </div>
+        <div>
+            <p>Reconhecimento Facial(recorte automático)</p>
+            <input type="radio" id="no" name="faceRec" value="false" checked>
+            <label for="no">Não</label>
+            <input type="radio" id="yes" name="faceRec" value="true">
+            <label for="yes">Sim</label>
+        </div>
+        <div>
+            <input id="btn" type="button" value="Gerar Carômetro">
         </div>
     </form>
     <div id="preview"></div>
@@ -172,9 +169,8 @@
                         list.className = "container";
                         list.id = `div${Number.parseInt(i / col)}`
                         content.appendChild(list);
-                        totalHeight += divHeight;
-                        divHeight = 0;
                     }
+                    divHeight = Math.max(imgSizeH + txtHeight, divHeight);
                     list.style.height = divHeight + "cm";
                     listItem.className = "box";
                     listItem.id = `box${i}`;
@@ -182,7 +178,7 @@
                     listItem.style.marginRight = imgMargin + "cm";
                     listItem.style.marginBottom = imgMargin + "cm";
                     listItem.style.borderWidth = imgBorder + "cm";
-                    img.style.width = imgSizeW + "cm";
+                    img.style.width = imgSizeW - imgBorder + "cm";
                     img.className = "imagem";
                     img.id = 'img' + i;
                     img.src = window.URL.createObjectURL(arrayImages[i].fileCrop);
@@ -193,15 +189,16 @@
                     list.appendChild(listItem);
                     listItem.appendChild(img);
                     listItem.appendChild(texto);
-                    divHeight = Math.max(imgSizeH + txtHeight, divHeight);
                     if (currentCol == col - 1 || arrayImages.length - 1 == i) {
-                        for (c = currentCol; c >= 0; c--) {
+                        for (c = 0; c < col; c++) {
                             const currentBoxTextHeight = $(`#box${i-c} p`)[0].style.height.split("cm")[0];
                             const currentBoxImageHeight = imgSizeW / arrayImages[i - c].width * arrayImages[i - c].height + imgBorder * 2 + imgMargin * 2;
-                            const currentContainerHeight = $(`#div${Number.parseInt(i / col)}`)[0].style.height.split("cm")[0];
-                            txtHeightStyle = Math.max(currentBoxTextHeight, currentContainerHeight - currentBoxImageHeight)
+                            const currentContainer = $(`#div${Number.parseInt(i / col)}`)[0];
+                            const currentContainerHeight = divHeight
+                            txtHeightStyle = currentContainerHeight - currentBoxImageHeight;
                             $(`#box${i-c} p`)[0].style.height = txtHeightStyle + "cm";
                         }
+                        totalHeight += divHeight;
                     }
                 }
             } else {
